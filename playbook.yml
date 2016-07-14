@@ -1,0 +1,13 @@
+---
+- hosts: all
+  vars:
+    http_port: 80
+    max_clients: 200
+    passw: <-DIGESTED_PASSW->
+    username: <-USERNAME->
+  become: true
+  tasks:
+  - user: name={{username}} shell=/bin/bash groups=sudo append=yes password={{passw}}
+  - file: path=/home/{{username}}/.ssh state=directory mode=700 owner={{username}} group={{username}}
+  - copy: src=support/id_rsa.pub dest=/home/{{username}}/.ssh/authorized_keys owner={{username}} group={{username}} mode=600
+  - copy: src=support/id_rsa dest=/home/{{username}}/.ssh/id_rsa owner={{username}} group={{username}} mode=600
