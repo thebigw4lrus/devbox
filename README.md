@@ -8,5 +8,3 @@ As I'm moving from a remote devbox to a local devbox, I've built this naive vagr
 
 ## To be improved:
 - Split playbook.yml in vars, tasks, etc... (separated folders)
-- Include the download/setup of Vundle, Vim, Tmux, git, etc.
-- Execute dotfile makes.
