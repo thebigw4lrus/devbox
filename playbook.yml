@@ -1,13 +1,49 @@
 ---
 - hosts: all
   vars:
-    http_port: 80
-    max_clients: 200
-    passw: <-DIGESTED_PASSW->
-    username: <-USERNAME->
+    passw: $6$PwEqtbbRVua6$ymIofbCVstJzvnA6JNUCoX/rgeDHkfUs1rjX3QPpvqv6bxxaGMSOhC/XuEhwWBmvkK3uy4zF/gRZ7uUXZRPqj.
+    username: javier.contreras
   become: true
   tasks:
-  - user: name={{username}} shell=/bin/bash groups=sudo append=yes password={{passw}}
-  - file: path=/home/{{username}}/.ssh state=directory mode=700 owner={{username}} group={{username}}
-  - copy: src=support/id_rsa.pub dest=/home/{{username}}/.ssh/authorized_keys owner={{username}} group={{username}} mode=600
-  - copy: src=support/id_rsa dest=/home/{{username}}/.ssh/id_rsa owner={{username}} group={{username}} mode=600
+  - name: "Insert user"
+    user: name={{username}} shell=/bin/bash groups=sudo append=yes password={{passw}}
+
+  - name: "Create .ssh folder"
+    file: path=/home/{{username}}/.ssh state=directory mode=700
+    become_user: "{{username}}"
+
+  - name: "Insert public key into guest"
+    copy: src=support/id_rsa.pub dest=/home/{{username}}/.ssh/authorized_keys mode=600
+    become_user: "{{username}}"
+
+  - name: "Provide private key to the guest"
+    copy: src=support/id_rsa dest=/home/{{username}}/.ssh/id_rsa mode=600
+    become_user: "{{username}}"
+
+  - name: "Tmux setup: add apt repo"
+    apt_repository: repo='ppa:pi-rho/dev'
+
+  - name:  "Install linux packages"
+    apt: name={{item}} state=installed update_cache=yes
+    with_items:
+      - git
+      - tig
+      - python-software-properties
+      - software-properties-common
+      - tmux
+      - rbenv
+
+  - name: "Include github.com in ssh known hosts"
+    shell: ssh-keyscan github.com >> /etc/ssh/ssh_known_hosts
+
+  - name: "Clone dotfile"
+    git: repo=git://github.com/thebigw4lrus/dotfiles.git dest=~/dotfiles
+    become_user: "{{username}}"
+
+  - name: "Install Vundle"
+    git: repo=git://github.com/VundleVim/Vundle.vim.git dest=~/.vim/bundle/Vundle.vim
+    become_user: "{{username}}"
+
+  - name: "Install dotfiles"
+    shell: make -C ~/dotfiles install
+    become_user: "{{username}}"
