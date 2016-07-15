@@ -1,7 +1,7 @@
 ---
 - hosts: all
   vars:
-    passw: $6$PwEqtbbRVua6$ymIofbCVstJzvnA6JNUCoX/rgeDHkfUs1rjX3QPpvqv6bxxaGMSOhC/XuEhwWBmvkK3uy4zF/gRZ7uUXZRPqj.
+    passw: <-DIGESTED-PASS->
     username: javier.contreras
   become: true
   tasks:
